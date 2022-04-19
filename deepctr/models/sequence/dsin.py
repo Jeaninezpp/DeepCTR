@@ -56,7 +56,6 @@ def DSIN(dnn_feature_columns, sess_feature_list, sess_max_count=5, bias_encoding
         raise ValueError(
             "hist_emb_size must equal to att_embedding_size * att_head_num ,got %d != %d *%d" % (
                 hist_emb_size, att_embedding_size, att_head_num))
-
     features = build_input_features(dnn_feature_columns)
 
     sparse_feature_columns = list(
@@ -75,7 +74,7 @@ def DSIN(dnn_feature_columns, sess_feature_list, sess_max_count=5, bias_encoding
         else:
             sparse_varlen_feature_columns.append(fc)
 
-    inputs_list = list(features.values())
+    inputs_list = list(features.values()) # [<tf.Tensor 'user_1:0'>,<tf.Tensor 'gender_1:0'>...]
 
     user_behavior_input_dict = {}
     for idx in range(sess_max_count):
@@ -106,14 +105,13 @@ def DSIN(dnn_feature_columns, sess_feature_list, sess_max_count=5, bias_encoding
 
     dnn_input_emb = Flatten()(concat_func(dnn_input_emb_list))
 
+    # tr_input:[<tf.Tensor shape=(None,4,8)>, <tf.Tensor shape=(None,4,8)>]
     tr_input = sess_interest_division(embedding_dict, user_behavior_input_dict, sparse_feature_columns,
                                       sess_feature_list, sess_max_count, bias_encoding=bias_encoding)
-
     Self_Attention = Transformer(att_embedding_size, att_head_num, dropout_rate=0, use_layer_norm=False,
                                  use_positional_encoding=(not bias_encoding), seed=seed, supports_masking=True,
                                  blinding=True)
-    sess_fea = sess_interest_extractor(
-        tr_input, sess_max_count, Self_Attention)
+    sess_fea = sess_interest_extractor(tr_input, sess_max_count, Self_Attention)
 
     interest_attention_layer = AttentionSequencePoolingLayer(att_hidden_units=(64, 16), weight_normalization=True,
                                                              supports_masking=False)(
@@ -161,8 +159,8 @@ def sess_interest_division(sparse_embedding_dict, user_behavior_input_dict, spar
 
 def sess_interest_extractor(tr_input, sess_max_count, TR):
     tr_out = []
+
     for i in range(sess_max_count):
-        tr_out.append(TR(
-            [tr_input[i], tr_input[i]]))
+        tr_out.append(TR([tr_input[i], tr_input[i]]))
     sess_fea = concat_func(tr_out, axis=1)
     return sess_fea

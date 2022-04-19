@@ -1,9 +1,13 @@
+import sys
+sys.path.append("/home/zpp/Dropbox/working/DeepCTR/")
+sys.path.append("../")
+
 import numpy as np
 import pytest
 
 from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, get_feature_names
 from deepctr.models.sequence.dsin import DSIN
-from ..utils import check_model
+from utils import check_model
 
 
 def get_xy_fd(hash_flag=False):
@@ -64,4 +68,5 @@ def test_DSIN(bias_encoding):
 
 
 if __name__ == "__main__":
-    pass
+    # pass
+    test_DSIN(bias_encoding=False)
