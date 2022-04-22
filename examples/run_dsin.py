@@ -16,13 +16,13 @@ def get_xy_fd(hash_flag=False):
                        DenseFeat('pay_score', 1)]
     feature_columns += [
         VarLenSparseFeat(SparseFeat('sess_0_item', 3 + 1, embedding_dim=4, use_hash=hash_flag, embedding_name='item'),
-                         maxlen=4), VarLenSparseFeat(
-            SparseFeat('sess_0_cate_id', 2 + 1, embedding_dim=4, use_hash=hash_flag, embedding_name='cate_id'),
+                         maxlen=4),
+        VarLenSparseFeat(SparseFeat('sess_0_cate_id', 2 + 1, embedding_dim=4, use_hash=hash_flag, embedding_name='cate_id'),
             maxlen=4)]
     feature_columns += [
         VarLenSparseFeat(SparseFeat('sess_1_item', 3 + 1, embedding_dim=4, use_hash=hash_flag, embedding_name='item'),
-                         maxlen=4), VarLenSparseFeat(
-            SparseFeat('sess_1_cate_id', 2 + 1, embedding_dim=4, use_hash=hash_flag, embedding_name='cate_id'),
+                         maxlen=4),
+        VarLenSparseFeat(SparseFeat('sess_1_cate_id', 2 + 1, embedding_dim=4, use_hash=hash_flag, embedding_name='cate_id'),
             maxlen=4)]
 
     behavior_feature_list = ["item", "cate_id"]
@@ -55,7 +55,10 @@ if __name__ == "__main__":
         tf.compat.v1.disable_eager_execution()
 
     x, y, feature_columns, behavior_feature_list = get_xy_fd(True)
-
+    # print("x:", x)
+    # print("y:", y)
+    # print("feature_columns:", feature_columns)
+    # print("behavior_feature_list:", behavior_feature_list)
     model = DSIN(feature_columns, behavior_feature_list, sess_max_count=2,
                  dnn_hidden_units=[4, 4, 4], dnn_dropout=0.5, )
 
