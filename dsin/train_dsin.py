@@ -8,10 +8,13 @@ from sklearn.metrics import log_loss, roc_auc_score
 from deepctr.models import DSIN
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 home = os.environ['HOME']
 
+
 def auroc(y_true,y_pred):
-    return tf.py_func(roc_auc_score, (y_true, y_pred), tf.double)
+    return tf.numpy_function(roc_auc_score, (y_true, y_pred), tf.double)
+
 
 if __name__ == "__main__":
     if tf.__version__ >= '2.0.0':
@@ -51,11 +54,11 @@ if __name__ == "__main__":
     BATCH_SIZE = 4096
     TEST_BATCH_SIZE = 2 ** 14
 
-    model = DSIN(fd, sess_feature, sess_max_count=SESS_COUNT, #sess_len_max=SESS_MAX_LEN,
+    model = DSIN(fd, sess_feature, sess_max_count=SESS_COUNT,
                  bias_encoding=False, att_embedding_size=1, att_head_num=8, dnn_hidden_units=(200,80))
     model.compile('adagrad', 'binary_crossentropy', metrics=['binary_crossentropy', auroc])
-    hist_ = model.fit(train_input, train_label, batch_size=BATCH_SIZE, epochs=1,
-                      initial_epoch=0, verbose=1,)
+    hist_ = model.fit(train_input, train_label, batch_size=BATCH_SIZE, epochs=EPOCH,
+                      initial_epoch=0, verbose=1, validation_data=(test_input, test_label))
     pred_ans = model.predict(test_input, TEST_BATCH_SIZE)
     print("")
     print("test LogLoss", round(log_loss(test_label, pred_ans), 4), "test AUC",
